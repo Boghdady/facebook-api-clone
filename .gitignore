@@ -1,4 +1,4 @@
 /node_modules
 notes.txt
-.env
+*.env
 ./src/config.ts
