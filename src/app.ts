@@ -5,13 +5,13 @@ import { config } from "./config";
 
 
 class Application {
-    public initialize(): void {
+    public async initialize(): Promise<void> {
         this.loadConfig();
         databaseConnection();
 
         const app: Express = express();
         const server = new AppServer(app);
-        server.start();
+        await server.start();
     }
 
     private loadConfig(): void {
@@ -21,4 +21,5 @@ class Application {
 
 const app: Application = new Application();
 app.initialize();
+
 

@@ -10,8 +10,9 @@ import "express-async-errors";
 import { Server } from "socket.io";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { createClient } from "redis";
-import {config} from "./config";
 
+import {config} from "./config";
+import appRoutes from "./routes";
 
 export class AppServer {
     private readonly app: Application;
@@ -20,12 +21,12 @@ export class AppServer {
     this.app = app;
     }
 
-    public start(): void {
+    public async start(): Promise<void> {
         this.securityMiddleware(this.app);
         this.standardMiddleware(this.app);
         this.routeMiddleware(this.app);
         this.globalErrorHandler(this.app);
-        this.startServer(this.app);
+        await this.startServer(this.app);
     }
 
     private securityMiddleware(app: Application): void {
@@ -53,7 +54,9 @@ export class AppServer {
         app.use(urlencoded({ extended: true, limit: "50mb" }));
     }
 
-    private routeMiddleware(app: Application): void {}
+    private routeMiddleware(app: Application): void {
+        appRoutes(app);
+    }
 
     private globalErrorHandler(app: Application): void{}
 
