@@ -13,6 +13,7 @@ import { createClient } from "redis";
 
 import {config} from "./config";
 import appRoutes from "./routes";
+import {CustomError, IErrorResponse} from "./shared/globals/helpers/error-handler";
 
 export class AppServer {
     private readonly app: Application;
@@ -58,7 +59,20 @@ export class AppServer {
         appRoutes(app);
     }
 
-    private globalErrorHandler(app: Application): void{}
+    private globalErrorHandler(app: Application): void {
+        // Handle unhandled routes
+        app.all("*", (req: Request, res: Response) => {
+            res.status(HTTP_STATUS.NOT_FOUND).json({message: `resource ${req.originalUrl} not found!`});
+        });
+
+        // Global error middleware
+        app.use(( error: IErrorResponse, req: Request, res: Response, next: NextFunction ) => {
+            if( error instanceof CustomError) {
+                res.status(error.statusCode).json(error.serializeError());
+            }
+            next();
+        });
+    }
 
     private async  startServer(app: Application): Promise<void> {
         try {
