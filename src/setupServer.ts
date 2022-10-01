@@ -12,9 +12,9 @@ import { createAdapter } from '@socket.io/redis-adapter';
 import { createClient } from 'redis';
 import Logger from 'bunyan';
 
-import { config } from './config';
-import appRoutes from './routes';
-import { CustomError, IErrorResponse } from './shared/globals/helpers/error-handler';
+import { config } from '@root/config';
+import appRoutes from '@root/routes';
+import { CustomError, IErrorResponse } from '@global/helpers/error-handler';
 
 const SERVER_PORT = config.PORT || 5000;
 const logger: Logger = config.createLogger('setupServer');
