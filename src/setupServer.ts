@@ -10,10 +10,14 @@ import "express-async-errors";
 import { Server } from "socket.io";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { createClient } from "redis";
+import Logger from "bunyan";
 
 import {config} from "./config";
 import appRoutes from "./routes";
 import {CustomError, IErrorResponse} from "./shared/globals/helpers/error-handler";
+
+const SERVER_PORT = config.PORT || 5000;
+const logger: Logger = config.createLogger("setupServer");
 
 export class AppServer {
     private readonly app: Application;
@@ -67,6 +71,7 @@ export class AppServer {
 
         // Global error middleware
         app.use(( error: IErrorResponse, req: Request, res: Response, next: NextFunction ) => {
+            logger.error(error);
             if( error instanceof CustomError) {
                 res.status(error.statusCode).json(error.serializeError());
             }
@@ -81,7 +86,7 @@ export class AppServer {
             this.startHttpServer(httpServer);
             this.socketIOConnections(socketIO);
         } catch (e) {
-            console.log(e);
+            logger.error(e);
         }
     }
 
@@ -104,9 +109,9 @@ export class AppServer {
     private socketIOConnections(io: Server): void {}
 
     private startHttpServer(httpServer: http.Server): void {
-        console.log(`Server has started with process ${process.pid}`);
-        httpServer.listen(config.PORT, () => {
-            console.log(`Server listening on port ${config.PORT}`);
+       logger.info(`Server has started with process ${process.pid}`);
+        httpServer.listen(SERVER_PORT, () => {
+            logger.info(`Server listening on port ${SERVER_PORT}`);
         });
     }
 }
