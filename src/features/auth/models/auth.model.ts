@@ -4,7 +4,7 @@ import { model, Model, Schema } from 'mongoose';
 
 const SALT_ROUND = 10;
 
-const authSchema: Schema = new Schema<IAuthDocument>(
+const authModel: Schema = new Schema<IAuthDocument>(
   {
     username: { type: String },
     uId: { type: String },
@@ -25,19 +25,19 @@ const authSchema: Schema = new Schema<IAuthDocument>(
   }
 );
 
-authSchema.pre('save', async function (this: IAuthDocument, next: () => void) {
+authModel.pre('save', async function (this: IAuthDocument, next: () => void) {
   this.password = await hash(this.password as string, SALT_ROUND);
   next();
 });
 
-authSchema.methods.comparePassword = async function (password: string): Promise<boolean> {
+authModel.methods.comparePassword = async function (password: string): Promise<boolean> {
   const hashedPassword: string = (this as unknown as IAuthDocument).password!;
   return compare(password, hashedPassword);
 };
 
-authSchema.methods.hashPassword = async function (password: string): Promise<string> {
+authModel.methods.hashPassword = async function (password: string): Promise<string> {
   return hash(password, SALT_ROUND);
 };
 
-const AuthModel: Model<IAuthDocument> = model<IAuthDocument>('Auth', authSchema, 'Auth');
+const AuthModel: Model<IAuthDocument> = model<IAuthDocument>('Auth', authModel, 'Auth');
 export { AuthModel };
