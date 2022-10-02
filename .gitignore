@@ -3,3 +3,4 @@ notes.txt
 .env
 ./src/config.ts
 /build
+.idea
