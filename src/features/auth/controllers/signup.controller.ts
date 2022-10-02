@@ -8,6 +8,7 @@ import { Helpers } from '@global/helpers/helpers';
 import { IAuthDocument, ISignUpData } from '@auth/interfaces/auth.interface';
 import { uploads } from '@global/helpers/cloudinary-upload';
 import { UploadApiResponse } from 'cloudinary';
+import HTTP_STATUS from 'http-status-codes';
 
 export class SignupController {
   @joiValidation(signupSchema)
@@ -43,6 +44,8 @@ export class SignupController {
     if (!upload?.public_id) {
       throw new BadRequestError('File upload failed. Try again');
     }
+
+    res.status(HTTP_STATUS.CREATED).json({ message: 'User Created Successfully', authData, upload });
   }
 
   private signupData(data: ISignUpData): IAuthDocument {
