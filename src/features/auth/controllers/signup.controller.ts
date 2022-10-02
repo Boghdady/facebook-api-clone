@@ -9,6 +9,9 @@ import { IAuthDocument, ISignUpData } from '@auth/interfaces/auth.interface';
 import { uploads } from '@global/helpers/cloudinary-upload';
 import { UploadApiResponse } from 'cloudinary';
 import HTTP_STATUS from 'http-status-codes';
+import { IUserDocument } from '@user/interfaces/user.interface';
+import { userCache } from '@service/redis/user-cache';
+import { config } from '@root/config';
 
 export class SignupController {
   @joiValidation(signupSchema)
@@ -30,7 +33,7 @@ export class SignupController {
     // The reason we are using SignupController.prototype.signupData and not
     // this.signupData is because of how we invoke the create method in the routes method.
     // the scope of "this" object is not kept when the method is invoked
-    const authData: IAuthDocument = SignupController.prototype.signupData({
+    const authData: IAuthDocument = SignupController.prototype.prepareSignupData({
       _id: authObjectId,
       uId,
       username,
@@ -40,15 +43,20 @@ export class SignupController {
     });
 
     // Will overwrite the image if it exist
-    const upload: UploadApiResponse = (await uploads(avatarImage, `${authObjectId}`, true, true)) as UploadApiResponse;
+    const upload: UploadApiResponse = (await uploads(avatarImage, `${userObjectId}`, true, true)) as UploadApiResponse;
     if (!upload?.public_id) {
       throw new BadRequestError('File upload failed. Try again');
     }
 
+    // 3) Save user to redis
+    const userDataForCache: IUserDocument = SignupController.prototype.prepareUserData(authData, userObjectId);
+    userDataForCache.profilePicture = `https://res.cloudinary.com/${config.CLOUDINARY_NAME}/image/upload/v${upload.version}/${userObjectId}`;
+    await userCache.saveUserToCache(`${userObjectId}`, uId, userDataForCache);
+
     res.status(HTTP_STATUS.CREATED).json({ message: 'User Created Successfully', authData, upload });
   }
 
-  private signupData(data: ISignUpData): IAuthDocument {
+  private prepareSignupData(data: ISignUpData): IAuthDocument {
     const { _id, username, email, uId, avatarColor, password } = data;
     return {
       _id,
@@ -59,5 +67,42 @@ export class SignupController {
       avatarColor,
       createdAt: new Date()
     } as IAuthDocument;
+  }
+
+  private prepareUserData(data: IAuthDocument, userObjectId: ObjectId): IUserDocument {
+    const { _id, username, email, uId, password, avatarColor } = data;
+    return {
+      _id: userObjectId,
+      authId: _id,
+      uId,
+      username: Helpers.firstLetterUppercase(username),
+      email,
+      password,
+      avatarColor,
+      profilePicture: '',
+      blocked: [],
+      blockedBy: [],
+      work: '',
+      location: '',
+      school: '',
+      quote: '',
+      bgImageVersion: '',
+      bgImageId: '',
+      followersCount: 0,
+      followingCount: 0,
+      postsCount: 0,
+      notifications: {
+        messages: true,
+        reactions: true,
+        comments: true,
+        follows: true
+      },
+      social: {
+        facebook: '',
+        instagram: '',
+        twitter: '',
+        youtube: ''
+      }
+    } as unknown as IUserDocument;
   }
 }
