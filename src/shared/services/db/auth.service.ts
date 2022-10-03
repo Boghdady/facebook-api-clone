@@ -10,6 +10,10 @@ class AuthService {
 
     return (await AuthModel.findOne(query)) as IAuthDocument;
   }
+
+  public async createAuthUser(data: IAuthDocument): Promise<void> {
+    await AuthModel.create(data);
+  }
 }
 
 export const authService: AuthService = new AuthService();

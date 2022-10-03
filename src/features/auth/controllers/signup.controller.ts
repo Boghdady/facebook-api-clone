@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { joiValidation } from '@global/decorators/joi-validation.decorator';
+import { omit } from 'lodash';
 import { signupSchema } from '@auth/schemes/signup';
 import { authService } from '@service/db/auth.service';
 import { BadRequestError } from '@global/helpers/error-handler';
@@ -13,6 +14,7 @@ import { IUserDocument } from '@user/interfaces/user.interface';
 import { userCache } from '@service/redis/user-cache';
 import { config } from '@root/config';
 import { authQueue } from '@service/queues/auth-queue';
+import { userQueue } from '@service/queues/user-queue';
 
 export class SignupController {
   @joiValidation(signupSchema)
@@ -55,7 +57,9 @@ export class SignupController {
     await userCache.saveUserToCache(`${userObjectId}`, uId, userDataForCache);
 
     // 4) Add user data to queue job
-    await authQueue.addAuthJob('addAuthUserToDB', authData as IAuthJob);
+    // omit(userDataForCache, ['uId', 'username', 'email', 'avatarColor', 'password']);
+    await authQueue.addAuthJob('addAuthUserToDB', { value: authData });
+    await userQueue.addUserJob('addUserToDB', { value: userDataForCache });
 
     res.status(HTTP_STATUS.CREATED).json({ message: 'User Created Successfully', authData, upload });
   }

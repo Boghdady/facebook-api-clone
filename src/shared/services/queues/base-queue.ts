@@ -43,11 +43,13 @@ export abstract class BaseQueue {
     });
   }
 
+  // Add job to the queue
   // retry 3 times if it fails but before retrying wait 5 second
   protected async addJob(name: string, data: IBaseJobData): Promise<void> {
     await this.queue.add(name, data, { attempts: 3, backoff: { type: 'fixed', delay: 5000 } });
   }
 
+  // Process job in the queue
   //concurrency : means How many jobs do you want to be processed at a given time
   protected async processJob(
     name: string,
