@@ -5,13 +5,14 @@ import { authService } from '@service/db/auth.service';
 import { BadRequestError } from '@global/helpers/error-handler';
 import { ObjectId } from 'mongodb';
 import { Helpers } from '@global/helpers/helpers';
-import { IAuthDocument, ISignUpData } from '@auth/interfaces/auth.interface';
+import { IAuthDocument, IAuthJob, ISignUpData } from '@auth/interfaces/auth.interface';
 import { uploads } from '@global/helpers/cloudinary-upload';
 import { UploadApiResponse } from 'cloudinary';
 import HTTP_STATUS from 'http-status-codes';
 import { IUserDocument } from '@user/interfaces/user.interface';
 import { userCache } from '@service/redis/user-cache';
 import { config } from '@root/config';
+import { authQueue } from '@service/queues/auth-queue';
 
 export class SignupController {
   @joiValidation(signupSchema)
@@ -52,6 +53,9 @@ export class SignupController {
     const userDataForCache: IUserDocument = SignupController.prototype.prepareUserData(authData, userObjectId);
     userDataForCache.profilePicture = `https://res.cloudinary.com/${config.CLOUDINARY_NAME}/image/upload/v${upload.version}/${userObjectId}`;
     await userCache.saveUserToCache(`${userObjectId}`, uId, userDataForCache);
+
+    // 4) Add user data to queue job
+    await authQueue.addAuthJob('addAuthUserToDB', authData as IAuthJob);
 
     res.status(HTTP_STATUS.CREATED).json({ message: 'User Created Successfully', authData, upload });
   }

@@ -19,8 +19,11 @@
   "author": "Ahmed Boghdady",
   "license": "MIT",
   "dependencies": {
+    "@bull-board/express": "^4.3.2",
+    "@bull-board/ui": "^4.3.2",
     "@socket.io/redis-adapter": "^7.2.0",
     "bcryptjs": "^2.4.3",
+    "bull": "^4.10.0",
     "bunyan": "^1.8.15",
     "cloudinary": "^1.32.0",
     "compression": "^1.7.4",
@@ -42,6 +45,7 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
+    "@types/bull": "^3.15.9",
     "@types/bunyan": "^1.8.8",
     "@types/compression": "^1.7.2",
     "@types/cookie-session": "^2.0.44",
