@@ -1,7 +1,6 @@
 import { BaseQueue } from '@service/queues/base-queue';
 import { IAuthJob } from '@auth/interfaces/auth.interface';
 import { authWorker } from '@worker/auth-worker';
-import { userWorker } from '@worker/user-worker';
 
 class AuthQueue extends BaseQueue {
   constructor() {

@@ -1,12 +1,11 @@
 import { Request, Response } from 'express';
 import { joiValidation } from '@global/decorators/joi-validation.decorator';
-import { omit } from 'lodash';
 import { signupSchema } from '@auth/schemes/signup';
 import { authService } from '@service/db/auth.service';
 import { BadRequestError } from '@global/helpers/error-handler';
 import { ObjectId } from 'mongodb';
 import { Helpers } from '@global/helpers/helpers';
-import { IAuthDocument, IAuthJob, ISignUpData } from '@auth/interfaces/auth.interface';
+import { IAuthDocument, ISignUpData } from '@auth/interfaces/auth.interface';
 import { uploads } from '@global/helpers/cloudinary-upload';
 import { UploadApiResponse } from 'cloudinary';
 import HTTP_STATUS from 'http-status-codes';
@@ -34,7 +33,7 @@ export class SignupController {
     const uId = `${Helpers.generateRandomIntegers(12)}`;
 
     // The reason we are using SignupController.prototype.signupData and not
-    // this.signupData is because of how we invoke the create method in the routes method.
+    // this.signupData is because of how we invoke the create method in the route method.
     // the scope of "this" object is not kept when the method is invoked
     const authData: IAuthDocument = SignupController.prototype.prepareSignupData({
       _id: authObjectId,
@@ -45,7 +44,7 @@ export class SignupController {
       avatarColor
     });
 
-    // Will overwrite the image if it exist
+    // Will overwrite the image if it exists
     const upload: UploadApiResponse = (await uploads(avatarImage, `${userObjectId}`, true, true)) as UploadApiResponse;
     if (!upload?.public_id) {
       throw new BadRequestError('File upload failed. Try again');
@@ -61,7 +60,13 @@ export class SignupController {
     await authQueue.addAuthJob('addAuthUserToDB', { value: authData });
     await userQueue.addUserJob('addUserToDB', { value: userDataForCache });
 
-    res.status(HTTP_STATUS.CREATED).json({ message: 'User Created Successfully', authData, upload });
+    // 5) Generate token and adding it in session
+    const userJWT: string = authService.signToken(authData, userObjectId);
+    req.session = { token: userJWT };
+
+    res
+      .status(HTTP_STATUS.CREATED)
+      .json({ message: 'User Created Successfully', user: userDataForCache, token: userJWT });
   }
 
   private prepareSignupData(data: ISignUpData): IAuthDocument {
