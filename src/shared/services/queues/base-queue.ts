@@ -31,7 +31,8 @@ export abstract class BaseQueue {
     this.logger = config.createLogger(`${queueName} Queue`);
 
     this.queue.on('completed', async (job: Job) => {
-      await job.remove();
+      // TODO: Uncomment that line in production
+      // await job.remove();
     });
 
     this.queue.on('global:completed', (jobId: string) => {
