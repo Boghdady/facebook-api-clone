@@ -19,7 +19,11 @@
   "author": "Ahmed Boghdady",
   "license": "MIT",
   "dependencies": {
+    "@bull-board/express": "^4.3.2",
+    "@bull-board/ui": "^4.3.2",
     "@socket.io/redis-adapter": "^7.2.0",
+    "bcryptjs": "^2.4.3",
+    "bull": "^4.10.0",
     "bunyan": "^1.8.15",
     "cloudinary": "^1.32.0",
     "compression": "^1.7.4",
@@ -40,17 +44,22 @@
     "typescript-transform-paths": "^3.3.1"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.2",
+    "@types/bull": "^3.15.9",
     "@types/bunyan": "^1.8.8",
     "@types/compression": "^1.7.2",
     "@types/cookie-session": "^2.0.44",
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.14",
     "@types/hpp": "^0.2.2",
+    "@types/jsonwebtoken": "^8.5.9",
+    "@types/lodash": "^4.14.186",
     "@typescript-eslint/eslint-plugin": "^5.38.1",
     "@typescript-eslint/parser": "^5.38.1",
     "eslint": "^8.24.0",
     "eslint-config-prettier": "^8.5.0",
     "prettier": "^2.7.1",
+    "redis-commander": "^0.8.0",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.1.0"
   }
