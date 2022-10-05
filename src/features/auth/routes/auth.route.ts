@@ -20,4 +20,4 @@ class AuthRoute {
   }
 }
 
-export const authRout: AuthRoute = new AuthRoute();
+export const authRoute: AuthRoute = new AuthRoute();

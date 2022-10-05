@@ -10,8 +10,8 @@ class UserService {
   public async getUserById(userId: string): Promise<IUserDocument> {
     const users: IUserDocument[] = await UserModel.aggregate([
       { $match: { _id: new mongoose.Types.ObjectId(userId) } },
-      { $lookup: { from: 'Auth', localField: 'authId', foreignField: '_id', as: 'authId' } },
-      { $unwind: '$authId' },
+      { $lookup: { from: 'Auth', localField: 'authId', foreignField: '_id', as: 'authUser' } },
+      { $unwind: '$authUser' }, // convert list to object
       { $project: this.aggregateProject() }
     ]);
     return users[0];
@@ -20,21 +20,22 @@ class UserService {
   public async getUserByAuthId(authId: string): Promise<IUserDocument> {
     const users: IUserDocument[] = await UserModel.aggregate([
       { $match: { authId: new mongoose.Types.ObjectId(authId) } },
-      { $lookup: { from: 'Auth', localField: 'authId', foreignField: '_id', as: 'authId' } },
-      { $unwind: '$authId' },
+      { $lookup: { from: 'Auth', localField: 'authId', foreignField: '_id', as: 'authUser' } },
+      { $unwind: '$authUser' }, // convert list to object
       { $project: this.aggregateProject() }
     ]);
     return users[0];
   }
 
+  // if value = 1 will return field in response if 0 will not return it
   private aggregateProject() {
     return {
       _id: 1,
-      username: '$authId.username',
-      uId: '$authId.uId',
-      email: '$authId.email',
-      avatarColor: '$authId.avatarColor',
-      createdAt: '$authId.createdAt',
+      username: '$authUser.username',
+      uId: '$authUser.uId',
+      email: '$authUser.email',
+      avatarColor: '$authUser.avatarColor',
+      createdAt: '$authUser.createdAt',
       postsCount: 1,
       work: 1,
       school: 1,
