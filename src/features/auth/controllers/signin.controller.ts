@@ -10,6 +10,7 @@ import { IUserDocument } from '@user/interfaces/user.interface';
 import { ObjectId } from 'mongodb';
 import HTTP_STATUS from 'http-status-codes';
 import { userService } from '@service/db/user.service';
+import { mailTransport } from '@service/emails/mail-transport';
 
 const logger: Logger = config.createLogger('SignInController');
 
@@ -46,6 +47,8 @@ export class SignInController {
       uId: existingAuthUser!.uId,
       createdAt: existingAuthUser!.createdAt
     } as IUserDocument;
+
+    await mailTransport.sendEmail('llewellyn.glover@ethereal.email', 'Test Email', 'This is test email');
 
     res.status(HTTP_STATUS.OK).json({ message: 'Login successfully', user: userDocument, token: userJwt });
   }
