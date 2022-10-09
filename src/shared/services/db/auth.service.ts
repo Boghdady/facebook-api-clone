@@ -15,7 +15,11 @@ class AuthService {
   }
 
   public async getAuthUserByUsername(username: string): Promise<IAuthDocument> {
-    return (await AuthModel.findOne({ username: Helpers.firstLetterUppercase(username) })) as IAuthDocument;
+    return (await AuthModel.findOne({ username: Helpers.firstLetterUppercase(username) }).exec()) as IAuthDocument;
+  }
+
+  public async getAuthUserByEmail(email: string): Promise<IAuthDocument> {
+    return (await AuthModel.findOne({ email: Helpers.lowercase(email) }).exec()) as IAuthDocument;
   }
 
   public async createAuthUser(data: IAuthDocument): Promise<void> {
@@ -33,6 +37,23 @@ class AuthService {
       },
       config.JWT_TOKEN!
     );
+  }
+
+  public async updatePasswordTokenAndExpires(authId: string, resetToken: string, tokenExpires: number): Promise<void> {
+    await AuthModel.updateOne(
+      { _id: authId },
+      {
+        passwordResetToken: resetToken,
+        passwordResetExpires: tokenExpires
+      }
+    );
+  }
+
+  public async getAuthUserByPasswordResetToken(resetPassToken: string): Promise<IAuthDocument> {
+    return (await AuthModel.findOne({
+      passwordResetToken: resetPassToken,
+      passwordResetExpires: { $gt: Date.now() }
+    }).exec()) as IAuthDocument;
   }
 }
 
