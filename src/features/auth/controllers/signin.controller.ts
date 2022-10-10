@@ -1,6 +1,4 @@
 import { NextFunction, Request, Response } from 'express';
-import Logger from 'bunyan';
-import { config } from '@root/config';
 import { joiValidation } from '@global/decorators/joi-validation.decorator';
 import { loginSchema } from '@auth/schemes/signin';
 import { IAuthDocument } from '@auth/interfaces/auth.interface';
@@ -10,10 +8,6 @@ import { IUserDocument } from '@user/interfaces/user.interface';
 import { ObjectId } from 'mongodb';
 import HTTP_STATUS from 'http-status-codes';
 import { userService } from '@service/db/user.service';
-import { mailTransport } from '@service/emails/mail-transport';
-import { emailQueue } from '@service/queues/email-queue';
-
-const logger: Logger = config.createLogger('SignInController');
 
 export class SignInController {
   @joiValidation(loginSchema)
@@ -38,12 +32,6 @@ export class SignInController {
 
     // Add token to session
     req.session = { token: userJwt };
-
-    // await emailQueue.addEmailJob('forgotPasswordEmail', {
-    //   receiverEmail: 'llewellyn.glover@ethereal.email',
-    //   subject: 'test subject',
-    //   template: 'test test'
-    // });
 
     const userDocument: IUserDocument = {
       ...user,
