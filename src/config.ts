@@ -17,6 +17,9 @@ class Config {
   public CLOUDINARY_NAME: string | undefined;
   public CLOUDINARY_API_KEY: string | undefined;
   public CLOUDINARY_API_SECRET: string | undefined;
+  public SENDER_EMAIL: string | undefined;
+  public SENDER_EMAIL_PASSWORD: string | undefined;
+  public SENDGRID_API_KEY: string | undefined;
 
   private readonly DEFAULT_DATABASE_URL = 'mongodb://localhost:27017/chatty-app';
 
@@ -32,13 +35,9 @@ class Config {
     this.CLOUDINARY_NAME = process.env.CLOUDINARY_NAME || undefined;
     this.CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY || undefined;
     this.CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET || undefined;
-  }
-
-  public createLogger(name: string): bunyan {
-    return bunyan.createLogger({
-      name,
-      level: 'debug'
-    });
+    this.SENDER_EMAIL = process.env.SENDER_EMAIL || undefined;
+    this.SENDER_EMAIL_PASSWORD = process.env.SENDER_EMAIL_PASSWORD || undefined;
+    this.SENDGRID_API_KEY = process.env.SENDGRID_API_KEY || undefined;
   }
 
   public validateConfig(): void {
@@ -47,6 +46,13 @@ class Config {
         throw new Error(`Configuration ${key} is undefined`);
       }
     }
+  }
+
+  public createLogger(name: string): bunyan {
+    return bunyan.createLogger({
+      name,
+      level: 'debug'
+    });
   }
 
   public cloudinaryConfig(): void {

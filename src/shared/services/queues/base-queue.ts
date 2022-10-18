@@ -5,9 +5,10 @@ import { BullAdapter } from '@bull-board/api/bullAdapter';
 import { config } from '@root/config';
 import { ExpressAdapter } from '@bull-board/express';
 import { IAuthJob } from '@auth/interfaces/auth.interface';
+import { IEmailJob } from '@user/interfaces/user.interface';
 
 // Every type of the job data you should define here
-type IBaseJobData = IAuthJob;
+type IBaseJobData = IAuthJob | IEmailJob;
 
 let bullAdapters: BullAdapter[] = [];
 export let serverAdapter: ExpressAdapter;
