@@ -1,7 +1,7 @@
 import { Server, Socket } from 'socket.io';
 
 // we will use this property to listen for events outside this class
-let socketIOPostObject: Server;
+export let socketIOPostObject: Server;
 
 export class SocketIOPostHandler {
   private io: Server;
