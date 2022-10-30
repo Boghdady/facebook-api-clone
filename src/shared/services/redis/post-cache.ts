@@ -169,4 +169,42 @@ export class PostCache extends BaseCache {
       throw new Error('Redis Error: Get user posts from cache');
     }
   }
+
+  public async getTotalUserPostsFromCache(uId: number): Promise<number> {
+    try {
+      if (!this.client.isOpen) {
+        await this.client.connect();
+      }
+      // ZCOUNT: Returns the number of elements in the sorted set
+      return await this.client.ZCOUNT('post', uId, uId);
+    } catch (e) {
+      logger.error(e);
+      throw new Error('Redis Error: Get total user posts from cache');
+    }
+  }
+
+  public async deletePostFromCache(key: string, currentUserId: string): Promise<void> {
+    try {
+      if (!this.client.isOpen) {
+        await this.client.connect();
+      }
+      // 1) Decrement posts count in cached user document by 1
+      // HMGET: Returns the values associated with the specified fields in the hash stored at key
+      const postsCount: string[] = await this.client.HMGET(`users:${currentUserId}`, 'postsCount');
+      const multi: ReturnType<typeof this.client.multi> = this.client.multi();
+
+      multi.ZREM('post', `${key}`);
+      multi.DEL(`posts:${key}`);
+      multi.DEL(`comments:${key}`);
+      multi.DEL(`reactions:${key}`);
+
+      const postsCountAfterDec: number = parseInt(postsCount[0], 10) - 1;
+      // Update postsCount field in cached user document
+      multi.HSET(`users:${currentUserId}`, ['postsCount', postsCountAfterDec]);
+      await multi.exec();
+    } catch (e) {
+      logger.error(e);
+      throw new ServerError('Redis Error. Delete post from cache');
+    }
+  }
 }
