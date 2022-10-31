@@ -207,4 +207,51 @@ export class PostCache extends BaseCache {
       throw new ServerError('Redis Error. Delete post from cache');
     }
   }
+
+  public async updatePostInCache(key: string, updatedPost: IPostDocument): Promise<IPostDocument> {
+    const { post, bgColor, feelings, privacy, gifUrl, imgVersion, imgId, profilePicture } = updatedPost;
+    const firstList: string[] = [
+      'post',
+      `${post}`,
+      'bgColor',
+      `${bgColor}`,
+      'feelings',
+      `${feelings}`,
+      'privacy',
+      `${privacy}`,
+      'gifUrl',
+      `${gifUrl}`
+    ];
+    const secondList: string[] = [
+      'profilePicture',
+      `${profilePicture}`,
+      'imgVersion',
+      `${imgVersion}`,
+      'imgId',
+      `${imgId}`
+    ];
+
+    const postToUpdate: string[] = [...firstList, ...secondList];
+
+    try {
+      if (!this.client.isOpen) {
+        await this.client.connect();
+      }
+      await this.client.HSET(`posts:${key}`, postToUpdate);
+
+      const multi: ReturnType<typeof this.client.multi> = await this.client.multi();
+      multi.HGETALL(`posts:${key}`);
+      const postInRedisHash: PostCacheMultiType = (await multi.exec()) as PostCacheMultiType;
+
+      const postAfterParsing = postInRedisHash as IPostDocument[];
+      postAfterParsing[0].commentsCount = Helpers.parseJson(`${postAfterParsing[0].commentsCount}`) as number;
+      postAfterParsing[0].reactions = Helpers.parseJson(`${postAfterParsing[0].reactions}`) as IReactions;
+      postAfterParsing[0].createdAt = Helpers.parseJson(`${postAfterParsing[0].createdAt}`) as Date;
+
+      return postAfterParsing[0];
+    } catch (e) {
+      logger.error(e);
+      throw new Error('Redis Error: Update post in cache');
+    }
+  }
 }
