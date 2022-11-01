@@ -96,11 +96,12 @@ export class PostCache extends BaseCache {
     }
   }
 
-  public async getPostFromCache(key: string, start: number, end: number): Promise<IPostDocument[]> {
+  public async getPostsFromCache(key: string, start: number, end: number): Promise<IPostDocument[]> {
     try {
       if (!this.client.isOpen) {
         await this.client.connect();
       }
+
       // 1) Will return list of postsIds that stored in sorted list
       // ZRANGE: Returns the specified range of elements in the sorted set stored
       const postsIdsInSortedSet: string[] = await this.client.ZRANGE(key, start, end, { REV: true });
@@ -108,7 +109,7 @@ export class PostCache extends BaseCache {
       // 2) Make a for loop to get posts from redis hash
       // HGETALL: Returns all fields and values of the hash stored at key
       const multi: ReturnType<typeof this.client.multi> = this.client.multi();
-      for (const postId in postsIdsInSortedSet) {
+      for (const postId of postsIdsInSortedSet) {
         multi.HGETALL(`posts:${postId}`);
       }
       const postsInRedisHash: PostCacheMultiType = (await multi.exec()) as PostCacheMultiType;
@@ -125,7 +126,7 @@ export class PostCache extends BaseCache {
       return postsAfterParsing;
     } catch (e) {
       logger.error(e);
-      throw new ServerError('Redis error: Get post from cache');
+      throw new ServerError('Redis error: Get posts from cache');
     }
   }
 

@@ -10,6 +10,13 @@ class PostRoute {
 
   public routes(): Router {
     this.router.post('/', authMiddleware.verifyToken, authMiddleware.checkAuth, PostController.prototype.createPost);
+    this.router.get('/:page', authMiddleware.verifyToken, authMiddleware.checkAuth, PostController.prototype.getPosts);
+    this.router.put(
+      '/:postId',
+      authMiddleware.verifyToken,
+      authMiddleware.checkAuth,
+      PostController.prototype.updatePost
+    );
 
     return this.router;
   }
