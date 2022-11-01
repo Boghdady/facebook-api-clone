@@ -9,12 +9,7 @@ class PostRoute {
   }
 
   public routes(): Router {
-    this.router.post(
-      '/',
-      authMiddleware.verifyToken,
-      authMiddleware.checkAuth,
-      PostController.prototype.createPostWithOutImage
-    );
+    this.router.post('/', authMiddleware.verifyToken, authMiddleware.checkAuth, PostController.prototype.createPost);
 
     return this.router;
   }
