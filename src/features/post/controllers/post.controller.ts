@@ -129,4 +129,13 @@ export class PostController {
 
     res.status(HTTP_STATUS.OK).json({ message: 'Updated Post Successfully' });
   }
+
+  public async deletePost(req: Request, res: Response): Promise<void> {
+    const { postId } = req.params;
+    socketIOPostObject.emit('DeletePostEvent', postId);
+    await postCache.deletePostFromCache(postId, `${req.currentUser?.userId}`);
+    postQueue.addPostJob('deletePostFromDB', { keyOne: postId, keyTwo: req.currentUser?.userId });
+
+    res.status(HTTP_STATUS.OK).json({ message: 'Post deleted successfully' });
+  }
 }

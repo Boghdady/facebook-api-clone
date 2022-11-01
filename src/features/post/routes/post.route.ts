@@ -18,6 +18,13 @@ class PostRoute {
       PostController.prototype.updatePost
     );
 
+    this.router.delete(
+      '/:postId',
+      authMiddleware.verifyToken,
+      authMiddleware.checkAuth,
+      PostController.prototype.deletePost
+    );
+
     return this.router;
   }
 }
