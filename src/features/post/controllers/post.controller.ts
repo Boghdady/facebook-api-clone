@@ -1,6 +1,4 @@
 import { Request, Response } from 'express';
-import { joiValidation } from '@global/decorators/joi-validation.decorator';
-import { postSchema } from '@post/schemes/post.schemes';
 import { ObjectId } from 'mongodb';
 import { IPostDocument } from '@post/interfaces/post.interface';
 import { PostCache } from '@service/redis/post-cache';
