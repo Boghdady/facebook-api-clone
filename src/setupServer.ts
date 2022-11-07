@@ -15,6 +15,7 @@ import Logger from 'bunyan';
 import { config } from '@root/config';
 import appRoutes from '@root/routes';
 import { CustomError, IErrorResponse } from '@global/helpers/error-handler';
+import { SocketIOPostHandler } from '@socket/post.socket';
 
 const SERVER_PORT = config.PORT || 5000;
 const logger: Logger = config.createLogger('setupServer');
@@ -108,7 +109,10 @@ export class AppServer {
     return io;
   }
 
-  private socketIOConnections(io: Server): void {}
+  private socketIOConnections(io: Server): void {
+    const postSocketIOHandler: SocketIOPostHandler = new SocketIOPostHandler(io);
+    postSocketIOHandler.listen();
+  }
 
   private startHttpServer(httpServer: http.Server): void {
     logger.info(`Server has started with process ${process.pid}`);

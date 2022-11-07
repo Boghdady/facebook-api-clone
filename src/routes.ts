@@ -2,6 +2,7 @@ import { Application } from 'express';
 import { authRoute } from '@auth/routes/auth.route';
 import { serverAdapter } from '@service/queues/base-queue';
 import { userRoute } from '@user/routes/user.route';
+import { postRoute } from '@post/routes/post.route';
 
 const BASE_PATH = '/api/v1';
 export default (app: Application) => {
@@ -9,6 +10,7 @@ export default (app: Application) => {
     app.use('/queues', serverAdapter.getRouter());
     app.use(BASE_PATH, authRoute.routes());
     app.use(`${BASE_PATH}/users`, userRoute.routes());
+    app.use(`${BASE_PATH}/posts`, postRoute.routes());
   };
 
   routes();
